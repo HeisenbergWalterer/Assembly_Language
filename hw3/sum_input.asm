@@ -4,6 +4,8 @@
 .DATA
     prompt_msg  DB 'Input (1-100): $'
     sum_msg     DB 'Output: $'
+    invalid_msg DB 'Invalid input (1-100)$'
+    newline     DB 0Dh,0Ah,'$'
     number      DW ?
     sum         DW 0
 
@@ -15,7 +17,7 @@ START:
     LEA DX, prompt_msg
     MOV AH, 09h
     INT 21h
-    XOR CX, CX
+    XOR CX, CX              ; ? CX ???????
 
 READ_INPUT:
     MOV AH, 01h
@@ -33,21 +35,35 @@ READ_INPUT:
 
 CALCULATE_SUM:
     MOV AX, CX
+    CMP AX, 1
+    JB  INVALID_INPUT       ; ?? 1
+    CMP AX, 100
+    JA  INVALID_INPUT       ; ?? 100
+
     MOV number, AX
-    MOV CX, AX
+    MOV CX, AX              ; ? CX ??????
     MOV BX, 1
-    XOR AX, AX
+    XOR AX, AX              ; AX ???
 
 SUM_LOOP:
     ADD AX, BX
     INC BX
     LOOP SUM_LOOP
+
     MOV sum, AX
     LEA DX, sum_msg
     MOV AH, 09h
     INT 21h
     MOV AX, sum
     CALL PRINT_DECIMAL
+    JMP EXIT_PROGRAM
+
+INVALID_INPUT:
+    LEA DX, invalid_msg
+    MOV AH, 09h
+    INT 21h
+
+EXIT_PROGRAM:
     MOV AH, 4Ch
     INT 21h
 
@@ -73,6 +89,12 @@ PRINT_LOOP:
     MOV AH, 02h
     INT 21h
     LOOP PRINT_LOOP
+
+    ; ??
+    MOV AH, 09h
+    LEA DX, newline
+    INT 21h
+
     POP DX
     POP CX
     POP BX
